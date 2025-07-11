@@ -1,0 +1,9 @@
+{
+    "title": "Приложение кофейни",
+    "price": "{price} ₽",
+    "increaseItemQuantityFailure": "Превышено количество товаров",
+    "yourOrder": "Ваш заказ",
+    "orderSuccess": "Заказ создан",
+    "orderFailure": "Возникла ошибка при оформлении заказа",
+    "makeOrder": "Оформить заказ"
+}
