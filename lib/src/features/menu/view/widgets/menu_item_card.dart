@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
-
-import 'package:practice_3_course/src/localization/app_localizations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:practice_3_course/src/theme/app_colors.dart';
 import 'package:practice_3_course/src/theme/image_sources.dart';
 import 'package:practice_3_course/src/features/menu/models/menu_item.dart';
+import 'package:practice_3_course/src/common/extensions/context_extensions.dart';
+import 'package:practice_3_course/src/features/order/bloc/order_bloc.dart';
 
 
-class MenuItemCard extends StatefulWidget {
+class MenuItemCard extends StatelessWidget {
   final MenuItem item;
 
   const MenuItemCard({required this.item, super.key});
 
   @override
-  State<MenuItemCard> createState() => _MenuItemCardState();
-}
-
-class _MenuItemCardState extends State<MenuItemCard> {
-  int _quantity = 0;
-
-  @override
   Widget build(BuildContext context) {
+    final quantity = context.select<OrderBloc, int>(
+      (bloc) => bloc.state.items[item] ?? 0,
+    );
+
     return SizedBox(
       width: 180,
       child: Card(
@@ -28,33 +27,48 @@ class _MenuItemCardState extends State<MenuItemCard> {
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           child: Column(
             children: [
-              Image.asset(
-                widget.item.imageUrl ?? ImageSources.placeholder,
+              CachedNetworkImage(
+                imageUrl: item.imageUrl ?? ImageSources.placeholder,
                 height: 100,
                 fit: BoxFit.contain,
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  widget.item.name,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  item.name,
+                  style: context.textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(
                 height: 24,
-                child: _quantity > 0
+                child: quantity > 0
                     ? Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          _iconButton(
-                            icon: Icons.remove,
-                            onPressed: () {
-                              setState(() {
-                                if (_quantity > 0) _quantity--;
-                              });
-                            },
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Ink(
+                              decoration: const ShapeDecoration(
+                                color: AppColors.blue,
+                                shape: CircleBorder(),
+                              ),
+                              child: IconButton(
+                                onPressed: () => context.read<OrderBloc>().add(
+                                      ChangeItemQuantityEvent(
+                                        item: item,
+                                        quantity: quantity - 1,
+                                      ),
+                                    ),
+                                icon: const Icon(Icons.remove, size: 9),
+                                color: AppColors.white,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
                           ),
                           Expanded(
                             child: Padding(
@@ -68,46 +82,44 @@ class _MenuItemCardState extends State<MenuItemCard> {
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
-                                  '$_quantity',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelMedium!
-                                      .copyWith(color: AppColors.white),
+                                  '$quantity',
+                                  style: context.textTheme.labelMedium
+                                      ?.copyWith(color: AppColors.white),
                                 ),
                               ),
                             ),
                           ),
-                          _iconButton(
-                            icon: Icons.add,
-                            onPressed: () {
-                              setState(() {
-                                if (_quantity < 10) {
-                                  _quantity++;
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      duration: const Duration(seconds: 2),
-                                      content: Text(
-                                        AppLocalizations.of(context)!
-                                            .increaseItemQuantityFailure,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium!
-                                            .copyWith(color: AppColors.white),
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Ink(
+                              decoration: const ShapeDecoration(
+                                color: AppColors.blue,
+                                shape: CircleBorder(),
+                              ),
+                              child: IconButton(
+                                onPressed: () => context.read<OrderBloc>().add(
+                                      ChangeItemQuantityEvent(
+                                        item: item,
+                                        quantity: quantity + 1,
                                       ),
                                     ),
-                                  );
-                                }
-                              });
-                            },
+                                icon: const Icon(Icons.add, size: 9),
+                                color: AppColors.white,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
                           ),
                         ],
                       )
                     : TextButton(
                         onPressed: () {
-                          setState(() {
-                            _quantity = 1;
-                          });
+                          context.read<OrderBloc>().add(
+                                ChangeItemQuantityEvent(
+                                  item: item,
+                                  quantity: 1,
+                                ),
+                              );
                         },
                         style: TextButton.styleFrom(
                           backgroundColor: AppColors.blue,
@@ -115,12 +127,9 @@ class _MenuItemCardState extends State<MenuItemCard> {
                         ),
                         child: Center(
                           child: Text(
-                            AppLocalizations.of(context)!
-                                .price(widget.item.price),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium!
-                                .copyWith(color: AppColors.white),
+                            context.l10n.price(item.price),
+                            style: context.textTheme.labelMedium
+                                ?.copyWith(color: AppColors.white),
                           ),
                         ),
                       ),
@@ -131,9 +140,20 @@ class _MenuItemCardState extends State<MenuItemCard> {
       ),
     );
   }
+}
 
-  Widget _iconButton(
-      {required IconData icon, required VoidCallback onPressed}) {
+class QuantityIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const QuantityIconButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 24,
       width: 24,
