@@ -9,12 +9,15 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get title => 'Кофейня';
+  String get title => 'Приложение кофейни';
 
   @override
   String price(Object price) {
     return '$price ₽';
   }
+
+  @override
+  String get increaseItemQuantityFailure => 'Превышено количество товаров';
 
   @override
   String get yourOrder => 'Ваш заказ';
@@ -23,7 +26,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get orderSuccess => 'Заказ создан';
 
   @override
-  String get orderFailure => 'Возникла ошибка при заказе';
+  String get orderFailure => 'Возникла ошибка при оформлении заказа';
 
   @override
   String get makeOrder => 'Оформить заказ';

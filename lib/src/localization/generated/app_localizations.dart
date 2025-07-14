@@ -17,7 +17,7 @@ import 'app_localizations_ru.dart';
 /// `supportedLocales` list. For example:
 ///
 /// ```dart
-/// import 'localization/app_localizations.dart';
+/// import 'generated/app_localizations.dart';
 ///
 /// return MaterialApp(
 ///   localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -97,7 +97,7 @@ abstract class AppLocalizations {
   /// No description provided for @title.
   ///
   /// In ru, this message translates to:
-  /// **'Кофейня'**
+  /// **'Приложение кофейни'**
   String get title;
 
   /// No description provided for @price.
@@ -105,6 +105,12 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'{price} ₽'**
   String price(Object price);
+
+  /// No description provided for @increaseItemQuantityFailure.
+  ///
+  /// In ru, this message translates to:
+  /// **'Превышено количество товаров'**
+  String get increaseItemQuantityFailure;
 
   /// No description provided for @yourOrder.
   ///
@@ -121,7 +127,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderFailure.
   ///
   /// In ru, this message translates to:
-  /// **'Возникла ошибка при заказе'**
+  /// **'Возникла ошибка при оформлении заказа'**
   String get orderFailure;
 
   /// No description provided for @makeOrder.
