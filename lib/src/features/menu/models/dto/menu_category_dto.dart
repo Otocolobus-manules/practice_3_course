@@ -1,7 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'menu_category_dto.g.dart';
+import '../../../../common/database/database.dart';
 
+part 'menu_category_dto.g.dart';
 
 @JsonSerializable()
 class MenuCategoryDto {
@@ -15,4 +16,11 @@ class MenuCategoryDto {
 
   factory MenuCategoryDto.fromJson(Map<String, dynamic> json) =>
       _$MenuCategoryDtoFromJson(json);
+
+  static fromDatabase(MenuCategory category) {
+    return MenuCategoryDto(
+      id: category.id,
+      slug: category.name,
+    );
+  }
 }
