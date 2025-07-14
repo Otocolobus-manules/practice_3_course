@@ -1,0 +1,174 @@
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:practice_3_course/src/theme/app_colors.dart';
+import 'package:practice_3_course/src/theme/image_sources.dart';
+import 'package:practice_3_course/src/features/menu/models/menu_item.dart';
+import 'package:practice_3_course/src/common/extensions/context_extensions.dart';
+import 'package:practice_3_course/src/features/order/bloc/order_bloc.dart';
+
+
+class MenuItemCard extends StatelessWidget {
+  final MenuItem item;
+
+  const MenuItemCard({required this.item, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final quantity = context.select<OrderBloc, int>(
+      (bloc) => bloc.state.items[item] ?? 0,
+    );
+
+    return SizedBox(
+      width: 180,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          child: Column(
+            children: [
+              CachedNetworkImage(
+                imageUrl: item.imageUrl ?? ImageSources.placeholder,
+                height: 100,
+                fit: BoxFit.contain,
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  item.name,
+                  style: context.textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              SizedBox(
+                height: 24,
+                child: quantity > 0
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Ink(
+                              decoration: const ShapeDecoration(
+                                color: AppColors.blue,
+                                shape: CircleBorder(),
+                              ),
+                              child: IconButton(
+                                onPressed: () => context.read<OrderBloc>().add(
+                                      ChangeItemQuantityEvent(
+                                        item: item,
+                                        quantity: quantity - 1,
+                                      ),
+                                    ),
+                                icon: const Icon(Icons.remove, size: 9),
+                                color: AppColors.white,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: Container(
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: AppColors.blue,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$quantity',
+                                  style: context.textTheme.labelMedium
+                                      ?.copyWith(color: AppColors.white),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Ink(
+                              decoration: const ShapeDecoration(
+                                color: AppColors.blue,
+                                shape: CircleBorder(),
+                              ),
+                              child: IconButton(
+                                onPressed: () => context.read<OrderBloc>().add(
+                                      ChangeItemQuantityEvent(
+                                        item: item,
+                                        quantity: quantity + 1,
+                                      ),
+                                    ),
+                                icon: const Icon(Icons.add, size: 9),
+                                color: AppColors.white,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : TextButton(
+                        onPressed: () {
+                          context.read<OrderBloc>().add(
+                                ChangeItemQuantityEvent(
+                                  item: item,
+                                  quantity: 1,
+                                ),
+                              );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: AppColors.blue,
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Center(
+                          child: Text(
+                            context.l10n.price(item.price),
+                            style: context.textTheme.labelMedium
+                                ?.copyWith(color: AppColors.white),
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class QuantityIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const QuantityIconButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 24,
+      width: 24,
+      child: Ink(
+        decoration: const ShapeDecoration(
+          color: AppColors.blue,
+          shape: CircleBorder(),
+        ),
+        child: IconButton(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 9),
+          color: AppColors.white,
+          padding: EdgeInsets.zero,
+        ),
+      ),
+    );
+  }
+}
