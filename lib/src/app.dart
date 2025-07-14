@@ -16,6 +16,9 @@ import 'package:practice_3_course/src/features/order/data/data_sources/order_dat
 import 'package:practice_3_course/src/features/order/data/order_repository.dart';
 import 'package:practice_3_course/src/common/extensions/context_extensions.dart';
 import 'package:practice_3_course/src/theme/theme.dart';
+import 'package:practice_3_course/src/common/database/database.dart';
+import 'package:practice_3_course/src/features/menu/data/data_sources/savable_categories_data_source.dart';
+import 'package:practice_3_course/src/features/menu/data/data_sources/savable_menu_data_source.dart';
 
 
 class CoffeeShop extends StatelessWidget {
@@ -27,11 +30,10 @@ class CoffeeShop extends StatelessWidget {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-      },
-      connectTimeout: const Duration(seconds: 20),
-      receiveTimeout: const Duration(seconds: 20),
-    ),
+      },),
   );
+
+  static final menuDb = MenuDb();
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +44,18 @@ class CoffeeShop extends StatelessWidget {
             networkCategoriesDataSource: NetworkCategoriesDataSource(
               dio: dioClient,
             ),
+            dbCategoriesDataSource: DbCategoriesDataSource(
+              menuDb: menuDb,
+            ),
           ),
         ),
         RepositoryProvider<IMenuRepository>(
           create: (_) => MenuRepository(
             networkMenuDataSource: NetworkMenuDataSource(
               dio: dioClient,
+            ),
+            dbMenuDataSource: DbMenuDataSource(
+              menuDb: menuDb,
             ),
           ),
         ),
