@@ -12,7 +12,19 @@ final ThemeData theme = ThemeData(
     color: AppColors.white,
     margin: EdgeInsets.zero,
   ),
-
+  progressIndicatorTheme:
+      const ProgressIndicatorThemeData(color: AppColors.blue),
+  bottomSheetTheme: const BottomSheetThemeData(
+    backgroundColor: AppColors.white,
+    surfaceTintColor: AppColors.white,
+    shadowColor: AppColors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(18),
+      ),
+    ),
+  ),
+  snackBarTheme: const SnackBarThemeData(backgroundColor: AppColors.snackbar),
   textTheme: TextTheme(
     headlineLarge: GoogleFonts.lato(
       fontSize: 32,
@@ -20,35 +32,30 @@ final ThemeData theme = ThemeData(
       height: 1.2,
       letterSpacing: 0,
     ),
-
     headlineSmall: GoogleFonts.lato(
       fontSize: 24,
       fontWeight: FontWeight.w500,
       height: 1.2,
       letterSpacing: 0,
     ),
-
     titleLarge: GoogleFonts.lato(
       fontSize: 20,
       fontWeight: FontWeight.w400,
       height: 1.2,
       letterSpacing: 0.4,
     ),
-
     titleMedium: GoogleFonts.lato(
       fontSize: 16,
       fontWeight: FontWeight.w500,
       height: 1.5,
       letterSpacing: 0.15,
     ),
-
     titleSmall: GoogleFonts.lato(
       fontSize: 14,
       fontWeight: FontWeight.w400,
       height: 1.43,
       letterSpacing: 0.25,
     ),
-    
     labelMedium: GoogleFonts.lato(
       fontSize: 12,
       fontWeight: FontWeight.w400,
