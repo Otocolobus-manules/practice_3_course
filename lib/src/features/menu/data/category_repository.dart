@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import 'package:practice_3_course/src/features/menu/models/dto/menu_category_dto.dart';
 import 'package:practice_3_course/src/features/menu/models/menu_category.dart';
 import 'package:practice_3_course/src/features/menu/utils/category_mapper.dart';
 import 'package:practice_3_course/src/features/menu/data/data_sources/categories_data_source.dart';
+import 'package:practice_3_course/src/features/menu/data/data_sources/savable_categories_data_source.dart';
 
 
 abstract interface class ICategoryRepository {
@@ -12,32 +15,26 @@ abstract interface class ICategoryRepository {
 
 final class CategoriesRepository implements ICategoryRepository {
   final ICategoriesDataSource _networkCategoriesDataSource;
+  final ISavableCategoriesDataSource _dbCategoriesDataSource;
 
   const CategoriesRepository({
     required ICategoriesDataSource networkCategoriesDataSource,
-  }) : _networkCategoriesDataSource = networkCategoriesDataSource;
+    required ISavableCategoriesDataSource dbCategoriesDataSource,
+  })  : _networkCategoriesDataSource = networkCategoriesDataSource,
+        _dbCategoriesDataSource = dbCategoriesDataSource;
 
   @override
   Future<List<MenuCategory>> loadCategories() async {
     var dtos = <MenuCategoryDto>[];
     try {
       dtos = await _networkCategoriesDataSource.fetchCategories();
+      _dbCategoriesDataSource.saveCategories(categories: dtos);
     } on DioException catch (e) {
-      print('DioException in loadCategories: ${e.message}');
-      print('Response: ${e.response?.data}');
-      print('Status code: ${e.response?.statusCode}');
-      
-      // Проверяем, является ли это CORS ошибкой
-      if (e.message?.contains('XMLHttpRequest') == true || 
-          e.message?.contains('connection error') == true) {
-        print('CORS error detected. This is likely a browser security restriction.');
-        throw Exception('CORS error: Unable to access the API from browser. Please try running on mobile device or use a CORS proxy.');
+      if (e.error is SocketException) {
+        dtos = await _dbCategoriesDataSource.fetchCategories();
+      } else {
+        throw Exception('Failed to load categories: $e');
       }
-      
-      throw Exception('Failed to load categories: ${e.message}');
-    } catch (e) {
-      print('Unexpected error in loadCategories: $e');
-      throw Exception('Failed to load categories: $e');
     }
     return dtos.map((e) => e.toModel()).toList();
   }
